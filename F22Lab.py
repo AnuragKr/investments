@@ -1,25 +1,36 @@
-import requests
-import json
-import re
-D = {}
-d = {}
-D_avg = {}
+import requests,json,re
+
+#---------------------------
+#Initialising Dictionary
+D_invest = {} #Dictionary which will container Investor:[List of Company He/She Invested]
+D_value = {} #Dictionary which will contain Comany:Valuation By Investor
+D_avg = {} #Dictionary which will contain Investor:Toatl Amount invested
+
+#----------------------------
+#Getting JSON Data From URL Using Requests Module
 r = requests.get('https://gist.githubusercontent.com/murtuzakz/4bd887712703ff14c9b0f7c18229b332/raw/d0dd1c59016e2488dcbe0c8e710a1c5df9c3672e/season7.json')
-data = json.loads(r.text)
-regex = re.compile("investors")
-regex2 = re.compile("Kevin")
+data = json.loads(r.text)#Loading JSON Data
+
+#-------------------------------
+#Regular Expression Used For Searching Particular Pattern Or Extracting Out Particular String
+investor = re.compile("investors")
+name = re.compile("Kevin")
 thousand = re.compile("\$((\d+\.\d+)|(\d+))K")
 million = re.compile("\$((\d+\.\d+)|(\d+))M")
 percentage = re.compile("((\d+)|(\d+\.\d+))%")
+
+#---------------------------------
+#Analysing JSON Data as Dictionary
 for key,val in data.items():
-    L = data[key]
+    L = data[key] #Getting a value of every key which denotes episode as List
+    #-------------------------------------------
+    #Now we have lists regarding one episode contain all info as dictionary 
     for j in range(len(L)):
-        str = ' '
-        for k,v in L[j].items():
-             match = regex.search(k)
+        for k,v in L[j].items():#Going one by one attributes of Dictionary
+             match = investor .search(k)#Finding a key investors
              if(match):
                  if v:
-                     li = []
+                     li = []#List of name of investor
                      temp = v.find("and")
                      if(temp > 0):
                          l = v.replace("and",",")
@@ -28,22 +39,20 @@ for key,val in data.items():
                          li[1]=li[1].replace('\n','')
                      else:
                         li = v.split(",")
-                     #print(li)
                      for i in li:
                              if (len(i)>1):
-                                 match = regex2.search(i)
+                                 match = name.search(i)
                                  if(match):
                                      lt = i.strip(' ').split(' ')
                                      if (len(lt)>2):
                                          i = lt[0]+" "+ lt[1]+lt[2]
                                      else:
                                          i = lt[0]+" " +lt[1]
-                                     #print(i.strip(' '))
                                  s = i.strip(' ')
-                                 D[s]=D.setdefault(s,[])
+                                 D_invest[s]=D_invest.setdefault(s,[])
                                  st = L[j]['company']['title']
-                                 D[s].append(st.replace('\xa0', ' '))
-                                 d[st]=d.setdefault(st,0)
+                                 D_invest[s].append(st.replace('\xa0', ' '))
+                                 D_value[st]=D_value.setdefault(st,0)
                                  stc = L[j]['kitna']
                                  m = stc.split('for')
                                  #print(m)
@@ -58,7 +67,7 @@ for key,val in data.items():
                                      percent = float(match.group(1))
                                  #print(invest_amount,percent)
                                  final_value = (invest_amount/percent)*100
-                                 d[st]=round(final_value)
+                                 D_value[st]=round(final_value)
                                  D_avg[s] = D_avg.setdefault(s,1)
                                  D_avg[s] += invest_amount
 
@@ -66,7 +75,7 @@ for key,val in data.items():
 # Getting list of all investors in a sorted order who invested in more number of companies
 print("A list of all the investors that invested, along with the companies they invested in, sorted by the investor with maximum number of investments")
 print("---------------------------------------------------------------------------------------------------")
-ranked = sorted(D.items(),key=lambda e:len(e[1]),reverse=True)#Doing Sorting Bases On Number Of Companies
+ranked = sorted(D_invest.items(),key=lambda e:len(e[1]),reverse=True)#Doing Sorting Bases On Number Of Companies
 for i in range(len(ranked)):
     print("\n{} : {}".format(ranked[i][0],ranked[i][1]))#Printing As Per Given Format
     #print("\n")
@@ -74,7 +83,7 @@ for i in range(len(ranked)):
 print("--------------------------------------------------------------------------------------------------")
 print("Valuation of the comapny by the Investor")
 print("**************************************************************************************************")
-ranked = sorted(d.items(),key=lambda e:e[1],reverse=True)
+ranked = sorted(D_value.items(),key=lambda e:e[1],reverse=True)
 for i in range(len(ranked)):
     print("\n{} : ${}".format(ranked[i][0],ranked[i][1]))
     #print("\n")
@@ -83,6 +92,6 @@ print("Total Amount  and Average Amount Invested By an Investor")
 print("--------------------------------------------------------------------------------------------------")
 ranked = sorted(D_avg.items(),key=lambda e:e[1],reverse=True)
 for i in range(len(ranked)):
-    print("\n{} : ${} : average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(D[ranked[i][0]])))
+    print("\n{} : ${} : average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(D_invest[ranked[i][0]])))
     #print("\n")
 print("--------------------------------------------------------------------------------------------------")
