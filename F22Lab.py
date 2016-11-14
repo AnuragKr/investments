@@ -29,9 +29,9 @@ for key,val in data.items():
         for k,v in L[j].items():#Going one by one attributes of Dictionary
              match = investor .search(k)#Finding a key investors
              if(match):
-                 if v:
+                 if v:#Accepting those investors who funded
                      li = []#List of name of investor
-                     temp = v.find("and")
+                     temp = v.find("and")#Case where name contains "and" just separating them
                      if(temp > 0):
                          l = v.replace("and",",")
                          li = l.split(',')
@@ -48,50 +48,51 @@ for key,val in data.items():
                                          i = lt[0]+" "+ lt[1]+lt[2]
                                      else:
                                          i = lt[0]+" " +lt[1]
-                                 s = i.strip(' ')
-                                 D_invest[s]=D_invest.setdefault(s,[])
-                                 st = L[j]['company']['title']
-                                 D_invest[s].append(st.replace('\xa0', ' '))
-                                 D_value[st]=D_value.setdefault(st,0)
-                                 stc = L[j]['kitna']
-                                 m = stc.split('for')
-                                 #print(m)
+                                 inv_name = i.strip(' ')
+                                 D_invest[inv_name]=D_invest.setdefault(inv_name,[])#Creating new key(name of investors) with empty list of companies
+                                 comp_name = L[j]['company']['title']#Taking out Company Name
+                                 D_invest[inv_name].append(comp_name.replace('\xa0', ' '))
+                                 D_value[comp_name]=D_value.setdefault(comp_name,1)#Creating new key(name of company) with value(valuation amount)
+                                 inv_amount = L[j]['kitna']
+                                 m = inv_amount.split('for')#Spliting a string of investing amount
                                  match = thousand.search(m[0])
                                  if(match):
-                                     invest_amount = float(match.group(1))*1000
+                                     invest_amount = float(match.group(1))*1000#For investment in K
                                  match = million.search(m[0])
                                  if(match):
-                                     invest_amount = float(match.group(1))*1000000
+                                     invest_amount = float(match.group(1))*1000000#For investment in M
                                  match = percentage.search(m[1])
                                  if(match):
-                                     percent = float(match.group(1))
-                                 #print(invest_amount,percent)
-                                 final_value = (invest_amount/percent)*100
-                                 D_value[st]=round(final_value)
-                                 D_avg[s] = D_avg.setdefault(s,1)
-                                 D_avg[s] += invest_amount
+                                     percent = float(match.group(1))#For Percentage
+                                 final_value = (invest_amount/percent)*100 #Calculating Valuation By Investor of company
+                                 D_value[comp_name]=round(final_value)
+                                 D_avg[inv_name] = D_avg.setdefault(inv_name,1)#Creating new key(name of investors) with value(Invested Amount)
+                                 D_avg[inv_name] += invest_amount
 
 
 # Getting list of all investors in a sorted order who invested in more number of companies
+
 print("A list of all the investors that invested, along with the companies they invested in, sorted by the investor with maximum number of investments")
 print("---------------------------------------------------------------------------------------------------")
 ranked = sorted(D_invest.items(),key=lambda e:len(e[1]),reverse=True)#Doing Sorting Bases On Number Of Companies
 for i in range(len(ranked)):
     print("\n{} : {}".format(ranked[i][0],ranked[i][1]))#Printing As Per Given Format
-    #print("\n")
 #Representing list of company with their predicted full current value
+    
 print("--------------------------------------------------------------------------------------------------")
 print("Valuation of the comapny by the Investor")
 print("**************************************************************************************************")
 ranked = sorted(D_value.items(),key=lambda e:e[1],reverse=True)
 for i in range(len(ranked)):
     print("\n{} : ${}".format(ranked[i][0],ranked[i][1]))
-    #print("\n")
 print("**************************************************************************************************")
+#Representing Total Amount And Average Amount invested by an Investor
+
 print("Total Amount  and Average Amount Invested By an Investor")
 print("--------------------------------------------------------------------------------------------------")
 ranked = sorted(D_avg.items(),key=lambda e:e[1],reverse=True)
 for i in range(len(ranked)):
-    print("\n{} : ${} : average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(D_invest[ranked[i][0]])))
-    #print("\n")
+    print("\n{} : Total Investment ${} : average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(D_invest[ranked[i][0]])))
 print("--------------------------------------------------------------------------------------------------")
+
+#---------------------------END OF CODE-------------------------------------------------------
