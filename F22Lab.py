@@ -3,6 +3,7 @@ import json
 import re
 D = {}
 d = {}
+D_avg = {}
 r = requests.get('https://gist.githubusercontent.com/murtuzakz/4bd887712703ff14c9b0f7c18229b332/raw/d0dd1c59016e2488dcbe0c8e710a1c5df9c3672e/season7.json')
 data = json.loads(r.text)
 regex = re.compile("investors")
@@ -58,6 +59,8 @@ for key,val in data.items():
                                  #print(invest_amount,percent)
                                  final_value = (invest_amount/percent)*100
                                  d[st]=round(final_value)
+                                 D_avg[s] = D_avg.setdefault(s,1)
+                                 D_avg[s] += invest_amount
 
 
 # Getting list of all investors in a sorted order who invested in more number of companies
@@ -65,15 +68,21 @@ print("A list of all the investors that invested, along with the companies they 
 print("---------------------------------------------------------------------------------------------------")
 ranked = sorted(D.items(),key=lambda e:len(e[1]),reverse=True)#Doing Sorting Bases On Number Of Companies
 for i in range(len(ranked)):
-    print("{} : {}".format(ranked[i][0],ranked[i][1]))#Printing As Per Given Format
-    print("\n")
+    print("\n{} : {}".format(ranked[i][0],ranked[i][1]))#Printing As Per Given Format
+    #print("\n")
 #Representing list of company with their predicted full current value
 print("--------------------------------------------------------------------------------------------------")
-print("A List of Company along with their value")
+print("Valuation of the comapny by the Investor")
 print("**************************************************************************************************")
 ranked = sorted(d.items(),key=lambda e:e[1],reverse=True)
 for i in range(len(ranked)):
-    print("{} : ${}".format(ranked[i][0],ranked[i][1]))
-    print("\n")
+    print("\n{} : ${}".format(ranked[i][0],ranked[i][1]))
+    #print("\n")
 print("**************************************************************************************************")
-    
+print("Total Amount  and Average Amount Invested By an Investor")
+print("--------------------------------------------------------------------------------------------------")
+ranked = sorted(D_avg.items(),key=lambda e:e[1],reverse=True)
+for i in range(len(ranked)):
+    print("\n{} : ${} : average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(D[ranked[i][0]])))
+    #print("\n")
+print("--------------------------------------------------------------------------------------------------")
