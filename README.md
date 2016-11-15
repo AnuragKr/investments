@@ -10,3 +10,7 @@ program that takes the above URL as input and prints the following as output :
 by the investor with maximum number of investments.
 2.A list of Company with it's valuation amount done by investor by extrapulating( ex-If someone invested $700 for 7% to convert it to 100%.... In this case it equals $10000 for 100% stake... So the value of the company is $10000)
 3.A list of Total Amount Invested by investor and then calculating average investment made by the customer.
+-----------------------------------------------------------------------------------------------------------------
+Before Running This Code Make Sure You Should Have Two Modules Installed On your Laptop:
+1.Requests
+2.Json
