@@ -106,7 +106,7 @@ def extractData(url):
 
 # Getting list of all investors in a sorted order who invested in more number of companies
 
-def invComp():
+def getListOfInvestorAndCompanyNames():
     print("A list of all the investors that invested, along with the companies they invested in, sorted by the investor with maximum number of investments")
     ranked = sorted(investorAndCompanyNames.items(),key=lambda e:len(e[1]),reverse=True)#Doing Sorting Bases On Number Of Companies
     for i in range(len(ranked)):
@@ -114,14 +114,14 @@ def invComp():
 
 #Representing list of company with their predicted full current value
         
-def compValue():
+def getListOfComapnyNameAndCompanyValue():
     print("\nValuation of the comapny by the Investor")
     ranked = sorted(companyNameAndCompanyValue.items(),key=lambda e:e[1],reverse=True)
     for i in range(len(ranked)):
         print("\n{} : ${}".format(ranked[i][0],ranked[i][1]))
 #Representing Total Amount And Average Amount invested by an Investor
 
-def invAvg():
+def getListOfInvestorAndInvestedAmount():
     print("\nTotal Amount  and Average Amount Invested By an Investor")
     ranked = sorted(investorNameAndAmountInvested.items(),key=lambda e:e[1],reverse=True)
     for i in range(len(ranked)):
@@ -129,9 +129,9 @@ def invAvg():
 
 #Main Function
 extractData('https://gist.githubusercontent.com/murtuzakz/4bd887712703ff14c9b0f7c18229b332/raw/d0dd1c59016e2488dcbe0c8e710a1c5df9c3672e/season7.json')
-invComp()
-compValue()
-invAvg()
+getListOfInvestorAndCompanyNames()
+getListOfComapnyNameAndCompanyValue()
+getListOfInvestorAndInvestedAmount()
 
     
 
