@@ -1,5 +1,6 @@
 import re
 import sys
+import mysql.connector
 
 try:
     import requests
@@ -83,7 +84,7 @@ def extractData(url):
                                          investorAndCompanyNames[investorName].append(companyName)
                                       companyNameAndCompanyValue[companyName]=companyNameAndCompanyValue.setdefault(companyName,1)
                                       
-                                      #Separating the amount and percentage valueinvested by investor
+                                      #Separating the amount and percentage value invested by investor
                                       
                                       amount = infoOfEpisodes[j]['kitna']
                                       m = amount.split('for')
@@ -107,32 +108,88 @@ def extractData(url):
 # Getting list of all investors in a sorted order who invested in more number of companies
 
 def getListOfInvestorAndCompanyNames():
-    print("A list of all the investors that invested, along with the companies they invested in, sorted by the investor with maximum number of investments")
     ranked = sorted(investorAndCompanyNames.items(),key=lambda e:len(e[1]),reverse=True)#Doing Sorting Bases On Number Of Companies
-    for i in range(len(ranked)):
-        print("\n{} : {}".format(ranked[i][0],ranked[i][1]))#Printing As Per Given Format
+    """for i in range(len(ranked)):
+        #print("\n{} : {}".format(ranked[i][0],ranked[i][1]))#Printing As Per Given Format
+        pass"""
+    return ranked
 
 #Representing list of company with their predicted full current value
         
 def getListOfComapnyNameAndCompanyValue():
-    print("\nValuation of the comapny by the Investor")
     ranked = sorted(companyNameAndCompanyValue.items(),key=lambda e:e[1],reverse=True)
-    for i in range(len(ranked)):
-        print("\n{} : ${}".format(ranked[i][0],ranked[i][1]))
+    """for i in range(len(ranked)):
+       # print("\n{} : ${}".format(ranked[i][0],ranked[i][1]))
+       pass"""
+    return ranked
 #Representing Total Amount And Average Amount invested by an Investor
 
 def getListOfInvestorAndInvestedAmount():
-    print("\nTotal Amount  and Average Amount Invested By an Investor")
     ranked = sorted(investorNameAndAmountInvested.items(),key=lambda e:e[1],reverse=True)
-    for i in range(len(ranked)):
-        print("\n{} : Total Investment ${} : average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(investorAndCompanyNames[ranked[i][0]])))
+    """for i in range(len(ranked)):
+        #print("\n{} : Total Investment ${} , average investment ${:.2f}".format(ranked[i][0],ranked[i][1],ranked[i][1]/len(investorAndCompanyNames[ranked[i][0]])))
+        pass"""
+    return ranked
 
+def insertingInvestorNameCompNameInDatabase(*tupleOfInvestorAndCompanyNames):
+    try:
+        conn = mysql.connector.connect(user='root',password='Anurag',host='127.0.0.1',database='sharktank')
+    except mysql.connector.Error as err:
+         print("Something went wrong: {}".format(err))
+    cursor = conn.cursor()
+    for i in range(len(tupleOfInvestorAndCompanyNames[0])):
+        investName = tupleOfInvestorAndCompanyNames[0][i][0]
+        compName = ",".join(tupleOfInvestorAndCompanyNames[0][i][1])
+        try:
+            cursor.execute("Insert into investorNamesAndCompanyNames (investorName,companyName) values('%s','%s')"%(investName,compName))
+        except mysql.connector.Error as err:
+            print("Something went wrong: {}".format(err))
+    print("Database Of InvestorName And CompanyName Updated")
+    conn.commit()
+    cursor.close()
+    conn.close()
+def insertingCompanyNameCompanyValueInDatabase(*tupleOfCompanyNameAndCompanyValue):
+    try:
+        conn = mysql.connector.connect(user='root',password='Anurag',host='127.0.0.1',database='sharktank')
+    except mysql.connector.Error as err:
+         print("Something went wrong: {}".format(err))
+    cursor = conn.cursor()
+    for i in range(len(tupleOfCompanyNameAndCompanyValue[0])):
+        compName = tupleOfCompanyNameAndCompanyValue[0][i][0]
+        compValue = ("$"+str(tupleOfCompanyNameAndCompanyValue[0][i][1]))
+        try:
+            cursor.execute("Insert into companyNamesAndCompanyValues (comapnyName,companyValue) values('%s','%s')"%(compName,compValue))
+        except mysql.connector.Error as err:
+            print("Something went wrong: {}".format(err))
+            break
+    print("Database Of CompanyName And CompanyValue Updated")
+    conn.commit()
+    cursor.close()
+    conn.close()
+def insertingInvestorNameAndAmountInvested(*tupleInvestorNameAndAmountInvested):
+     try:
+        conn = mysql.connector.connect(user='root',password='Anurag',host='127.0.0.1',database='sharktank')
+     except mysql.connector.Error as err:
+         print("Something went wrong: {}".format(err))
+     cursor = conn.cursor()
+     for i in range(len(tupleInvestorNameAndAmountInvested[0])):
+        invName = tupleInvestorNameAndAmountInvested[0][i][0]
+        invValue = ("$"+str(tupleInvestorNameAndAmountInvested[0][i][1]))
+        try:
+            cursor.execute("Insert into investorNamesAndAmountInvested (investorName,amountInvested) values('%s','%s')"%(invName,invValue))
+        except mysql.connector.Error as err:
+            print("Something went wrong: {}".format(err))
+            break
+     print("Database Of InvestorName And AmountInvested Updated")
+     conn.commit()
+     cursor.close()
+     conn.close()
+    
 #Main Function
 extractData('https://gist.githubusercontent.com/murtuzakz/4bd887712703ff14c9b0f7c18229b332/raw/d0dd1c59016e2488dcbe0c8e710a1c5df9c3672e/season7.json')
-getListOfInvestorAndCompanyNames()
-getListOfComapnyNameAndCompanyValue()
-getListOfInvestorAndInvestedAmount()
-
-    
-
-        
+tupleInvNameAndCompName = getListOfInvestorAndCompanyNames()
+insertingInvestorNameCompNameInDatabase(tupleInvNameAndCompName)
+tupleCompNameAndValue = getListOfComapnyNameAndCompanyValue()
+insertingCompanyNameCompanyValueInDatabase(tupleCompNameAndValue)
+tupleInvNameAndAmountInvested = getListOfInvestorAndInvestedAmount()
+insertingInvestorNameAndAmountInvested (tupleInvNameAndAmountInvested)
